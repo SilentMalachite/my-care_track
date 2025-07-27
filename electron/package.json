@@ -1,0 +1,20 @@
+{
+  "name": "caretrack-electron",
+  "version": "1.0.0",
+  "description": "CareTrack Electron Application",
+  "main": "dist/main.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "electron": "^latest",
+    "sqlite3": "^latest"
+  },
+  "devDependencies": {
+    "@types/node": "^latest",
+    "typescript": "^latest",
+    "vitest": "^latest"
+  }
+}

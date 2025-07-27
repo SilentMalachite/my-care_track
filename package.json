@@ -1,0 +1,68 @@
+{
+  "name": "my-care-track",
+  "version": "1.0.0",
+  "description": "Local Disability Support Client Management System",
+  "main": "electron/dist/main.js",
+  "scripts": {
+    "start": "npm run build && electron .",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:electron\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && rails server -p 3001",
+    "dev:electron": "electron .",
+    "build": "npm run build:electron && npm run build:frontend && npm run build:backend",
+    "build:electron": "cd electron && npx tsc",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && bundle exec rails assets:precompile",
+    "test": "npm run test:frontend && npm run test:backend",
+    "test:frontend": "cd frontend && npm test",
+    "test:backend": "cd backend && bundle exec rspec",
+    "test:packaging": "jest tests/packaging.test.js",
+    "package": "electron-builder",
+    "package:win": "electron-builder --win",
+    "package:mac": "electron-builder --mac",
+    "package:linux": "electron-builder --linux"
+  },
+  "keywords": [
+    "disability",
+    "client-management",
+    "care-support",
+    "electron",
+    "offline",
+    "welfare-system"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "concurrently": "^8.2.2",
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3",
+    "jest": "^30.0.5",
+    "vite-plugin-electron": "^0.29.0",
+    "vite-plugin-electron-renderer": "^0.14.6"
+  },
+  "build": {
+    "appId": "com.caretrack.app",
+    "productName": "CareTrack",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "frontend/dist/**/*",
+      "backend/public/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.healthcare-fitness"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2"
+  }
+}
