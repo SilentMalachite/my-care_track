@@ -80,7 +80,7 @@
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/yourusername/my-care_track.git
+git clone https://github.com/SilentMalachite/my-care_track.git
 cd my-care_track
 
 # バックエンドセットアップ

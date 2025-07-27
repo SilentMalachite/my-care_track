@@ -250,7 +250,7 @@ bundle outdated
 
 ### 開発チーム
 - **Email**: dev@yourcompany.com
-- **GitHub**: @your-org/my-care_track
+- **GitHub**: @SilentMalachite/my-care_track
 
 ---
 
