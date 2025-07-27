@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **プロジェクト構造の改善**
+  - NPM Workspacesによる依存関係の一元管理
+  - 単一のpackage-lock.jsonによるロックファイル管理
+  - 共通依存関係（TypeScript, ESLint, Vitest）のルート集約
+- **ドキュメントの追加**
+  - ARCHITECTURE.md - 技術スタック間の関係を明確化
+  - docs/SETUP_GUIDE.md - 開発者向け詳細セットアップガイド
+- **統合テストの追加**
+  - project-structure.test.js - プロジェクト構造検証（7テスト）
+  - dependency-management.test.js - 依存関係管理検証（6テスト）
+  - build-process.test.js - ビルドプロセス検証（11テスト）
+
+### Changed
+- **依存関係管理の統合**
+  - backend/frontendディレクトリの重複を削除
+  - frontend、electronのpackage-lock.jsonを削除
+  - 開発ツールをルートpackage.jsonに移動
+- **ビルドプロセスの改善**
+  - build:allスクリプトを追加
+  - ワークスペース対応のnpm installコマンド
+
+### Fixed
+- フロントエンドディレクトリの重複問題を解決
+- 依存関係の重複とバージョン不整合を解消
+- ビルドプロセスの複雑性を簡素化
+
 ## [1.0.0] - 2025-07-27
 
 ### Added

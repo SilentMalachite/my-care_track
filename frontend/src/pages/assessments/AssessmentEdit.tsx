@@ -4,9 +4,11 @@ import { AssessmentForm } from '../../components/assessments/AssessmentForm';
 import { assessmentService } from '../../services/assessmentService';
 import { clientService } from '../../services/clientService';
 import { supportPlanService } from '../../services/supportPlanService';
+import { staffService } from '../../services/staffService';
 import type { Assessment, AssessmentFormData } from '../../types/assessment';
 import type { Client } from '../../types/client';
 import type { SupportPlan } from '../../types/supportPlan';
+import type { Staff } from '../../types/staff';
 
 export function AssessmentEdit() {
   const { id } = useParams<{ id: string }>();
@@ -28,10 +30,11 @@ export function AssessmentEdit() {
   const loadData = async (assessmentId: number) => {
     try {
       setLoading(true);
-      const [assessmentData, clientsData, plansData] = await Promise.all([
+      const [assessmentData, clientsData, plansData, staffData] = await Promise.all([
         assessmentService.getAssessmentById(assessmentId),
         clientService.getClients(),
         supportPlanService.getSupportPlans(),
+        staffService.getActiveStaff(),
       ]);
 
       setAssessment(assessmentData);
@@ -50,12 +53,12 @@ export function AssessmentEdit() {
         }))
       );
 
-      // TODO: スタッフ情報も同様に取得
-      setStaff([
-        { id: 1, name: 'スタッフA' },
-        { id: 2, name: 'スタッフB' },
-        { id: 3, name: 'スタッフC' },
-      ]);
+      setStaff(
+        staffData.map((staff: Staff) => ({
+          id: staff.id,
+          name: staff.name,
+        }))
+      );
     } catch (err) {
       setError('データの読み込みに失敗しました');
       console.error(err);

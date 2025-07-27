@@ -1,12 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { assessmentService } from './assessmentService';
-import apiClient from './api';
+import { apiClientInstance } from './api';
 import type { Assessment, AssessmentFormData } from '../types/assessment';
 
-vi.mock('./api');
+vi.mock('./api', async () => {
+  const actual = await vi.importActual('./api');
+  return {
+    ...actual,
+    apiClientInstance: {
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      patch: vi.fn(),
+      delete: vi.fn(),
+    },
+  };
+});
 
 describe('assessmentService', () => {
-  const mockApiClient = apiClient as any;
+  const mockApiClient = apiClientInstance as any;
 
   beforeEach(() => {
     vi.clearAllMocks();

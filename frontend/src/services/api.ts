@@ -4,11 +4,54 @@ import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'ax
 const API_BASE_URL = process.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 const API_TIMEOUT = 30000; // 30秒
 
+// APIエンドポイント定数
+export const API_ENDPOINTS = {
+  CLIENTS: '/clients',
+  SUPPORT_PLANS: '/support-plans',
+  SERVICE_LOGS: '/service-logs',
+  ASSESSMENTS: '/assessments',
+  STAFF: '/staff',
+} as const;
+
 // APIエラーの型定義
 export interface ApiError {
   message: string;
   status: number;
   errors?: Record<string, string[]>;
+}
+
+// APIクライアントクラス
+export class ApiClient {
+  private client: AxiosInstance;
+
+  constructor(client: AxiosInstance) {
+    this.client = client;
+  }
+
+  async get<T>(url: string, params?: any): Promise<T> {
+    const response = await this.client.get<T>(url, { params });
+    return response.data;
+  }
+
+  async post<T>(url: string, data?: any): Promise<T> {
+    const response = await this.client.post<T>(url, data);
+    return response.data;
+  }
+
+  async put<T>(url: string, data?: any): Promise<T> {
+    const response = await this.client.put<T>(url, data);
+    return response.data;
+  }
+
+  async patch<T>(url: string, data?: any): Promise<T> {
+    const response = await this.client.patch<T>(url, data);
+    return response.data;
+  }
+
+  async delete<T>(url: string): Promise<T> {
+    const response = await this.client.delete<T>(url);
+    return response.data;
+  }
 }
 
 // APIクライアントの作成
@@ -144,6 +187,9 @@ export const setupInterceptors = (client: AxiosInstance, navigate?: (path: strin
 // デフォルトインターセプターの設定
 setupInterceptors(apiClient);
 
+// APIクライアントクラスのインスタンス
+export const apiClientInstance = new ApiClient(apiClient);
+
 // 共通APIメソッド
 export const api = {
   get: <T = any>(url: string, config?: any) => apiClient.get<T>(url, config),
@@ -153,4 +199,4 @@ export const api = {
   delete: <T = any>(url: string, config?: any) => apiClient.delete<T>(url, config),
 };
 
-export default api;
+export default apiClientInstance;

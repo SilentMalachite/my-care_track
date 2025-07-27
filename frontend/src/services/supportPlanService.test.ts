@@ -1,27 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { supportPlanService } from './supportPlanService';
 import { SupportPlan, CreateSupportPlanRequest, UpdateSupportPlanRequest } from '../types/supportPlan';
-import apiClient from './api';
+import { apiClientInstance } from './api';
 
 // APIクライアントのモック
 vi.mock('./api', async () => {
   const actual = await vi.importActual('./api');
   return {
     ...actual,
-    default: {
+    apiClientInstance: {
       get: vi.fn(),
       post: vi.fn(),
       put: vi.fn(),
       delete: vi.fn(),
     },
     API_ENDPOINTS: {
-      SUPPORT_PLANS: '/api/support_plans',
-      CLIENTS: '/api/clients',
+      SUPPORT_PLANS: '/support-plans',
+      CLIENTS: '/clients',
     },
   };
 });
 
-const mockApiClient = vi.mocked(apiClient);
+const mockApiClient = vi.mocked(apiClientInstance);
 
 // テストデータ
 const mockSupportPlan: SupportPlan = {
@@ -61,7 +61,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.getSupportPlans();
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/support_plans', undefined);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/support-plans', undefined);
       expect(result).toEqual(mockSupportPlanList);
     });
 
@@ -71,7 +71,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.getSupportPlans(params);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/support_plans', params);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/support-plans', params);
       expect(result).toEqual([mockSupportPlan]);
     });
 
@@ -90,7 +90,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.getSupportPlans(params);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/support_plans', params);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/support-plans', params);
       expect(result).toEqual(paginatedResponse);
     });
   });
@@ -101,7 +101,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.getSupportPlan(1);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/support_plans/1');
+      expect(mockApiClient.get).toHaveBeenCalledWith('/support-plans/1');
       expect(result).toEqual(mockSupportPlan);
     });
 
@@ -119,7 +119,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.getClientSupportPlans(1);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/clients/1/support_plans', undefined);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/clients/1/support_plans', undefined);
       expect(result).toEqual(clientPlans);
     });
 
@@ -129,7 +129,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.getClientSupportPlans(1, { status: 'active' });
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/clients/1/support_plans', { status: 'active' });
+      expect(mockApiClient.get).toHaveBeenCalledWith('/clients/1/support_plans', { status: 'active' });
       expect(result).toEqual(activePlans);
     });
   });
@@ -152,7 +152,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.createSupportPlan(createData);
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/api/support_plans', createData);
+      expect(mockApiClient.post).toHaveBeenCalledWith('/support-plans', createData);
       expect(result).toEqual(createdPlan);
     });
 
@@ -177,7 +177,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.createSupportPlan(minimalData);
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/api/support_plans', minimalData);
+      expect(mockApiClient.post).toHaveBeenCalledWith('/support-plans', minimalData);
       expect(result).toEqual(createdPlan);
     });
 
@@ -206,7 +206,7 @@ describe('supportPlanService', () => {
       const result = await supportPlanService.updateSupportPlan(updateData);
 
       const { id, ...expectedData } = updateData;
-      expect(mockApiClient.put).toHaveBeenCalledWith('/api/support_plans/1', expectedData);
+      expect(mockApiClient.put).toHaveBeenCalledWith('/support-plans/1', expectedData);
       expect(result).toEqual(updatedPlan);
     });
 
@@ -221,7 +221,7 @@ describe('supportPlanService', () => {
       const result = await supportPlanService.updateSupportPlan(statusUpdate);
 
       const { id, ...expectedData } = statusUpdate;
-      expect(mockApiClient.put).toHaveBeenCalledWith('/api/support_plans/1', expectedData);
+      expect(mockApiClient.put).toHaveBeenCalledWith('/support-plans/1', expectedData);
       expect(result).toEqual(updatedPlan);
     });
   });
@@ -232,7 +232,7 @@ describe('supportPlanService', () => {
 
       await supportPlanService.deleteSupportPlan(1);
 
-      expect(mockApiClient.delete).toHaveBeenCalledWith('/api/support_plans/1');
+      expect(mockApiClient.delete).toHaveBeenCalledWith('/support-plans/1');
     });
 
     it('関連データがある計画の削除でエラーが発生する', async () => {
@@ -258,7 +258,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.calculateProgress(1);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/support_plans/1/progress');
+      expect(mockApiClient.get).toHaveBeenCalledWith('/support-plans/1/progress');
       expect(result).toEqual(progressData);
     });
   });
@@ -287,7 +287,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.getSupportPlanStats();
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/support_plans/stats', undefined);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/support-plans/stats', undefined);
       expect(result).toEqual(statsData);
     });
 
@@ -314,7 +314,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.getSupportPlanStats({ clientId: 1 });
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/support_plans/stats', { clientId: 1 });
+      expect(mockApiClient.get).toHaveBeenCalledWith('/support-plans/stats', { clientId: 1 });
       expect(result).toEqual(clientStats);
     });
   });
@@ -328,7 +328,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.bulkUpdateStatus(planIds, newStatus);
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/api/support_plans/bulk-update-status', {
+      expect(mockApiClient.post).toHaveBeenCalledWith('/support-plans/bulk-update-status', {
         planIds,
         status: newStatus,
       });
@@ -356,7 +356,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.duplicatePlan(1, duplicateOptions);
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/api/support_plans/1/duplicate', duplicateOptions);
+      expect(mockApiClient.post).toHaveBeenCalledWith('/support-plans/1/duplicate', duplicateOptions);
       expect(result).toEqual(duplicatedPlan);
     });
   });
@@ -368,7 +368,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.getUpcomingReviews(7);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/support_plans/upcoming-reviews', { days: 7 });
+      expect(mockApiClient.get).toHaveBeenCalledWith('/support-plans/upcoming-reviews', { days: 7 });
       expect(result).toEqual(upcomingPlans);
     });
 
@@ -378,7 +378,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.getUpcomingReviews();
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/support_plans/upcoming-reviews', { days: 30 });
+      expect(mockApiClient.get).toHaveBeenCalledWith('/support-plans/upcoming-reviews', { days: 30 });
       expect(result).toEqual(upcomingPlans);
     });
   });
@@ -394,7 +394,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.exportSupportPlans('csv');
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/support_plans/export', { format: 'csv' });
+      expect(mockApiClient.get).toHaveBeenCalledWith('/support-plans/export', { format: 'csv' });
       expect(result).toEqual(exportData);
     });
 
@@ -413,7 +413,7 @@ describe('supportPlanService', () => {
 
       const result = await supportPlanService.exportSupportPlans('csv', filters);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/support_plans/export', {
+      expect(mockApiClient.get).toHaveBeenCalledWith('/support-plans/export', {
         format: 'csv',
         ...filters,
       });

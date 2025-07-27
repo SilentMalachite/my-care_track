@@ -4,9 +4,11 @@ import { AssessmentForm } from '../../components/assessments/AssessmentForm';
 import { assessmentService } from '../../services/assessmentService';
 import { clientService } from '../../services/clientService';
 import { supportPlanService } from '../../services/supportPlanService';
+import { staffService } from '../../services/staffService';
 import type { AssessmentFormData } from '../../types/assessment';
 import type { Client } from '../../types/client';
 import type { SupportPlan } from '../../types/supportPlan';
+import type { Staff } from '../../types/staff';
 
 export function AssessmentNew() {
   const navigate = useNavigate();
@@ -24,9 +26,10 @@ export function AssessmentNew() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [clientsData, plansData] = await Promise.all([
+      const [clientsData, plansData, staffData] = await Promise.all([
         clientService.getClients(),
         supportPlanService.getSupportPlans(),
+        staffService.getActiveStaff(),
       ]);
 
       setClients(
@@ -43,12 +46,12 @@ export function AssessmentNew() {
         }))
       );
 
-      // TODO: スタッフ情報も同様に取得
-      setStaff([
-        { id: 1, name: 'スタッフA' },
-        { id: 2, name: 'スタッフB' },
-        { id: 3, name: 'スタッフC' },
-      ]);
+      setStaff(
+        staffData.map((staff: Staff) => ({
+          id: staff.id,
+          name: staff.name,
+        }))
+      );
     } catch (err) {
       setError('データの読み込みに失敗しました');
       console.error(err);

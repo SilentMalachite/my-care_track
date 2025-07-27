@@ -1,4 +1,4 @@
-import apiClient from './api';
+import { apiClientInstance } from './api';
 import type { Assessment, AssessmentFormData } from '../types/assessment';
 
 interface AssessmentFilters {
@@ -28,7 +28,7 @@ class AssessmentService {
    * アセスメントリストを取得
    */
   async getAssessments(filters: AssessmentFilters = {}): Promise<Assessment[]> {
-    const response = await apiClient.get('/assessments', { params: filters });
+    const response = await apiClientInstance.get('/assessments', { params: filters });
     return response.data;
   }
 
@@ -36,7 +36,7 @@ class AssessmentService {
    * 指定IDのアセスメントを取得
    */
   async getAssessmentById(id: number): Promise<Assessment> {
-    const response = await apiClient.get(`/assessments/${id}`);
+    const response = await apiClientInstance.get(`/assessments/${id}`);
     return response.data;
   }
 
@@ -44,7 +44,7 @@ class AssessmentService {
    * 特定クライアントのアセスメントを取得
    */
   async getAssessmentsByClientId(clientId: number): Promise<Assessment[]> {
-    const response = await apiClient.get('/assessments', { params: { clientId } });
+    const response = await apiClientInstance.get('/assessments', { params: { clientId } });
     return response.data;
   }
 
@@ -52,7 +52,7 @@ class AssessmentService {
    * 新規アセスメントを作成
    */
   async createAssessment(data: AssessmentFormData): Promise<Assessment> {
-    const response = await apiClient.post('/assessments', data);
+    const response = await apiClientInstance.post('/assessments', data);
     return response.data;
   }
 
@@ -60,7 +60,7 @@ class AssessmentService {
    * 既存アセスメントを更新
    */
   async updateAssessment(id: number, data: Partial<AssessmentFormData>): Promise<Assessment> {
-    const response = await apiClient.patch(`/assessments/${id}`, data);
+    const response = await apiClientInstance.patch(`/assessments/${id}`, data);
     return response.data;
   }
 
@@ -68,14 +68,14 @@ class AssessmentService {
    * アセスメントを削除
    */
   async deleteAssessment(id: number): Promise<void> {
-    await apiClient.delete(`/assessments/${id}`);
+    await apiClientInstance.delete(`/assessments/${id}`);
   }
 
   /**
    * アセスメントを承認
    */
   async finalizeAssessment(id: number): Promise<Assessment> {
-    const response = await apiClient.post(`/assessments/${id}/finalize`);
+    const response = await apiClientInstance.post(`/assessments/${id}/finalize`);
     return response.data;
   }
 
@@ -83,7 +83,7 @@ class AssessmentService {
    * アセスメントの統計情報を取得
    */
   async getAssessmentStatistics(): Promise<AssessmentStatistics> {
-    const response = await apiClient.get('/assessments/statistics');
+    const response = await apiClientInstance.get('/assessments/statistics');
     return response.data;
   }
 
@@ -91,7 +91,7 @@ class AssessmentService {
    * 既存のアセスメントを複製
    */
   async duplicateAssessment(id: number, overrides: Partial<AssessmentFormData>): Promise<Assessment> {
-    const response = await apiClient.post(`/assessments/${id}/duplicate`, overrides);
+    const response = await apiClientInstance.post(`/assessments/${id}/duplicate`, overrides);
     return response.data;
   }
 
@@ -99,7 +99,7 @@ class AssessmentService {
    * アセスメントデータをエクスポート
    */
   async exportAssessmentData(options: ExportOptions): Promise<string | Blob> {
-    const response = await apiClient.get('/assessments/export', {
+    const response = await apiClientInstance.get('/assessments/export', {
       params: options,
       responseType: options.format === 'pdf' ? 'blob' : 'text',
     });

@@ -1,28 +1,28 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { serviceLogService } from './serviceLogService';
 import { ServiceLog, CreateServiceLogRequest, UpdateServiceLogRequest } from '../types/serviceLog';
-import apiClient from './api';
+import { apiClientInstance } from './api';
 
 // APIクライアントのモック
 vi.mock('./api', async () => {
   const actual = await vi.importActual('./api');
   return {
     ...actual,
-    default: {
+    apiClientInstance: {
       get: vi.fn(),
       post: vi.fn(),
       put: vi.fn(),
       delete: vi.fn(),
     },
     API_ENDPOINTS: {
-      SERVICE_LOGS: '/api/service_logs',
-      CLIENTS: '/api/clients',
-      SUPPORT_PLANS: '/api/support_plans',
+      SERVICE_LOGS: '/service-logs',
+      CLIENTS: '/clients',
+      SUPPORT_PLANS: '/support-plans',
     },
   };
 });
 
-const mockApiClient = vi.mocked(apiClient);
+const mockApiClient = vi.mocked(apiClientInstance);
 
 // テストデータ
 const mockServiceLog: ServiceLog = {
@@ -72,7 +72,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.getServiceLogs();
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/service_logs', undefined);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/service-logs', undefined);
       expect(result).toEqual(mockServiceLogList);
     });
 
@@ -86,7 +86,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.getServiceLogs(params);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/service_logs', params);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/service-logs', params);
       expect(result).toEqual([mockServiceLog]);
     });
 
@@ -99,7 +99,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.getServiceLogs(params);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/service_logs', params);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/service-logs', params);
       expect(result).toEqual(mockServiceLogList);
     });
 
@@ -118,7 +118,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.getServiceLogs(params);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/service_logs', params);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/service-logs', params);
       expect(result).toEqual(paginatedResponse);
     });
   });
@@ -129,7 +129,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.getServiceLog(1);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/service_logs/1');
+      expect(mockApiClient.get).toHaveBeenCalledWith('/service-logs/1');
       expect(result).toEqual(mockServiceLog);
     });
 
@@ -147,7 +147,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.getClientServiceLogs(1);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/clients/1/service_logs', undefined);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/clients/1/service_logs', undefined);
       expect(result).toEqual(clientLogs);
     });
 
@@ -160,7 +160,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.getClientServiceLogs(1, params);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/clients/1/service_logs', params);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/clients/1/service_logs', params);
       expect(result).toEqual(mockServiceLogList);
     });
   });
@@ -172,7 +172,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.getPlanServiceLogs(1);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/support_plans/1/service_logs', undefined);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/support-plans/1/service_logs', undefined);
       expect(result).toEqual(planLogs);
     });
   });
@@ -204,7 +204,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.createServiceLog(createData);
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/api/service_logs', createData);
+      expect(mockApiClient.post).toHaveBeenCalledWith('/service-logs', createData);
       expect(result).toEqual(createdLog);
     });
 
@@ -231,7 +231,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.createServiceLog(minimalData);
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/api/service_logs', minimalData);
+      expect(mockApiClient.post).toHaveBeenCalledWith('/service-logs', minimalData);
       expect(result).toEqual(createdLog);
     });
 
@@ -260,7 +260,7 @@ describe('serviceLogService', () => {
       const result = await serviceLogService.updateServiceLog(updateData);
 
       const { id, ...expectedData } = updateData;
-      expect(mockApiClient.put).toHaveBeenCalledWith('/api/service_logs/1', expectedData);
+      expect(mockApiClient.put).toHaveBeenCalledWith('/service-logs/1', expectedData);
       expect(result).toEqual(updatedLog);
     });
 
@@ -275,7 +275,7 @@ describe('serviceLogService', () => {
       const result = await serviceLogService.updateServiceLog(statusUpdate);
 
       const { id, ...expectedData } = statusUpdate;
-      expect(mockApiClient.put).toHaveBeenCalledWith('/api/service_logs/1', expectedData);
+      expect(mockApiClient.put).toHaveBeenCalledWith('/service-logs/1', expectedData);
       expect(result).toEqual(updatedLog);
     });
   });
@@ -286,7 +286,7 @@ describe('serviceLogService', () => {
 
       await serviceLogService.deleteServiceLog(1);
 
-      expect(mockApiClient.delete).toHaveBeenCalledWith('/api/service_logs/1');
+      expect(mockApiClient.delete).toHaveBeenCalledWith('/service-logs/1');
     });
 
     it('承認済みログの削除でエラーが発生する', async () => {
@@ -322,7 +322,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.getServiceLogStats();
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/service_logs/stats', undefined);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/service-logs/stats', undefined);
       expect(result).toEqual(statsData);
     });
 
@@ -351,7 +351,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.getServiceLogStats({ clientId: 1 });
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/service_logs/stats', { clientId: 1 });
+      expect(mockApiClient.get).toHaveBeenCalledWith('/service-logs/stats', { clientId: 1 });
       expect(result).toEqual(clientStats);
     });
   });
@@ -365,7 +365,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.bulkUpdateStatus(logIds, newStatus, 10);
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/api/service_logs/bulk-update-status', {
+      expect(mockApiClient.post).toHaveBeenCalledWith('/service-logs/bulk-update-status', {
         logIds,
         status: newStatus,
         approvedBy: 10,
@@ -394,7 +394,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.getDailySummary('2024-01-15');
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/service_logs/daily-summary', { date: '2024-01-15' });
+      expect(mockApiClient.get).toHaveBeenCalledWith('/service-logs/daily-summary', { date: '2024-01-15' });
       expect(result).toEqual(summary);
     });
   });
@@ -426,7 +426,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.getMonthlyReport(2024, 1);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/service_logs/monthly-report', { year: 2024, month: 1 });
+      expect(mockApiClient.get).toHaveBeenCalledWith('/service-logs/monthly-report', { year: 2024, month: 1 });
       expect(result).toEqual(report);
     });
   });
@@ -442,7 +442,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.exportServiceLogs('csv');
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/service_logs/export', { format: 'csv' });
+      expect(mockApiClient.get).toHaveBeenCalledWith('/service-logs/export', { format: 'csv' });
       expect(result).toEqual(exportData);
     });
 
@@ -462,7 +462,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.exportServiceLogs('csv', filters);
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/service_logs/export', {
+      expect(mockApiClient.get).toHaveBeenCalledWith('/service-logs/export', {
         format: 'csv',
         ...filters,
       });
@@ -477,7 +477,7 @@ describe('serviceLogService', () => {
 
       const result = await serviceLogService.searchServiceLogs('入浴介助');
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/service_logs/search', { q: '入浴介助' });
+      expect(mockApiClient.get).toHaveBeenCalledWith('/service-logs/search', { q: '入浴介助' });
       expect(result).toEqual(searchResults);
     });
 
@@ -495,7 +495,7 @@ describe('serviceLogService', () => {
         serviceType: 'physical_care' 
       });
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/api/service_logs/search', params);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/service-logs/search', params);
       expect(result).toEqual(searchResults);
     });
   });

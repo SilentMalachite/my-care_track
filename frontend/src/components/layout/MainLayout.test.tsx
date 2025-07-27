@@ -18,6 +18,11 @@ vi.mock('./Navigation', () => ({
   ),
 }));
 
+// パンくずリストコンポーネントのモック
+vi.mock('./Breadcrumb', () => ({
+  Breadcrumb: () => <nav data-testid="breadcrumb" aria-label="パンくずリスト">Breadcrumb</nav>,
+}));
+
 // React Routerでラップするヘルパー
 const renderWithRouter = (component: React.ReactElement) => {
   return render(
@@ -57,6 +62,9 @@ describe('MainLayout', () => {
       // フッター
       expect(screen.getByRole('contentinfo')).toBeInTheDocument();
       expect(screen.getByText(/© 2024/)).toBeInTheDocument();
+
+      // パンくずリスト
+      expect(screen.getByTestId('breadcrumb')).toBeInTheDocument();
     });
 
     it('正しいARIA属性が設定されている', () => {
@@ -152,7 +160,45 @@ describe('MainLayout', () => {
       );
 
       expect(screen.getByText('管理者')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'ログアウト' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'ユーザーメニュー' })).toBeInTheDocument();
+    });
+
+    it('カスタムユーザー情報を表示できる', () => {
+      const userInfo = {
+        name: '山田太郎',
+        role: 'スタッフ',
+        email: 'yamada@example.com'
+      };
+
+      renderWithRouter(
+        <MainLayout userInfo={userInfo}>
+          <div>コンテンツ</div>
+        </MainLayout>
+      );
+
+      expect(screen.getByText('山田太郎')).toBeInTheDocument();
+      expect(screen.getByText('(スタッフ)')).toBeInTheDocument();
+    });
+
+    it('ユーザーメニューをクリックすると詳細情報が表示される', async () => {
+      const user = userEvent.setup();
+      const userInfo = {
+        name: '山田太郎',
+        role: 'スタッフ',
+        email: 'yamada@example.com'
+      };
+
+      renderWithRouter(
+        <MainLayout userInfo={userInfo}>
+          <div>コンテンツ</div>
+        </MainLayout>
+      );
+
+      const userMenuButton = screen.getByRole('button', { name: /ユーザーメニュー/ });
+      await user.click(userMenuButton);
+
+      expect(screen.getByText('yamada@example.com')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'プロフィール設定' })).toBeInTheDocument();
     });
 
     it('現在時刻が表示される', () => {
@@ -181,8 +227,51 @@ describe('MainLayout', () => {
         </MainLayout>
       );
 
-      const navigation = screen.getByTestId('navigation');
-      expect(navigation).toHaveAttribute('data-collapsed', 'true');
+      // モバイルではナビゲーションは固定で、transformで制御される
+      const navContainer = screen.getByRole('navigation', { name: 'メインナビゲーション' });
+      expect(navContainer).toHaveClass('transform', '-translate-x-full');
+    });
+
+    it('モバイル画面でメニューを開くとオーバーレイが表示される', async () => {
+      const user = userEvent.setup();
+      // モバイルサイズに設定
+      Object.defineProperty(window, 'innerWidth', { value: 375, writable: true });
+      fireEvent(window, new Event('resize'));
+
+      renderWithRouter(
+        <MainLayout>
+          <div>コンテンツ</div>
+        </MainLayout>
+      );
+
+      const hamburgerButton = screen.getByRole('button', { name: /メニューを開く/ });
+      await user.click(hamburgerButton);
+
+      // モバイルメニューオーバーレイが表示される
+      expect(screen.getByTestId('mobile-menu-overlay')).toBeInTheDocument();
+    });
+
+    it('モバイル画面でオーバーレイをクリックするとメニューが閉じる', async () => {
+      const user = userEvent.setup();
+      // モバイルサイズに設定
+      Object.defineProperty(window, 'innerWidth', { value: 375, writable: true });
+      fireEvent(window, new Event('resize'));
+
+      renderWithRouter(
+        <MainLayout>
+          <div>コンテンツ</div>
+        </MainLayout>
+      );
+
+      const hamburgerButton = screen.getByRole('button', { name: /メニューを開く/ });
+      await user.click(hamburgerButton);
+
+      const overlay = screen.getByTestId('mobile-menu-overlay');
+      await user.click(overlay);
+
+      // ナビゲーションが閉じている（transformで制御）
+      const navContainer = screen.getByRole('navigation', { name: 'メインナビゲーション' });
+      expect(navContainer).toHaveClass('transform', '-translate-x-full');
     });
 
     it('タブレット画面で適切なレイアウトが適用される', () => {
@@ -389,6 +478,59 @@ describe('MainLayout', () => {
 
       expect(screen.queryByTestId('main-content')).not.toBeInTheDocument();
       expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+    });
+  });
+
+  describe('フッター機能', () => {
+    it('フッターに基本情報が表示される', () => {
+      renderWithRouter(
+        <MainLayout>
+          <div>コンテンツ</div>
+        </MainLayout>
+      );
+
+      expect(screen.getByText(/© 2024 障害者支援クライアント管理システム/)).toBeInTheDocument();
+      expect(screen.getByText('Version 1.0.0')).toBeInTheDocument();
+    });
+
+    it('環境情報が表示される', () => {
+      renderWithRouter(
+        <MainLayout>
+          <div>コンテンツ</div>
+        </MainLayout>
+      );
+
+      const envInfo = screen.getByTestId('environment-info');
+      expect(envInfo).toBeInTheDocument();
+      expect(envInfo).toHaveTextContent('環境:');
+      expect(envInfo).toHaveTextContent('開発');
+    });
+
+    it('データベース接続状態が表示される', () => {
+      renderWithRouter(
+        <MainLayout>
+          <div>コンテンツ</div>
+        </MainLayout>
+      );
+
+      const dbStatus = screen.getByTestId('db-status');
+      expect(dbStatus).toBeInTheDocument();
+      expect(dbStatus).toHaveTextContent('DB:');
+      expect(dbStatus).toHaveTextContent('接続中');
+    });
+
+    it('最終更新日時が表示される', () => {
+      renderWithRouter(
+        <MainLayout>
+          <div>コンテンツ</div>
+        </MainLayout>
+      );
+
+      const lastUpdated = screen.getByTestId('last-updated');
+      expect(lastUpdated).toBeInTheDocument();
+      expect(lastUpdated).toHaveTextContent('最終更新:');
+      // 日時のフォーマットを確認
+      expect(lastUpdated.textContent).toMatch(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/);
     });
   });
 });

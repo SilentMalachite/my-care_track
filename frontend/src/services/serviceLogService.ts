@@ -1,5 +1,4 @@
-import apiClient, { ApiClient } from './api';
-import { API_ENDPOINTS } from './api';
+import { apiClientInstance, ApiClient, API_ENDPOINTS } from './api';
 import {
   ServiceLog,
   CreateServiceLogRequest,
@@ -178,4 +177,4 @@ class ServiceLogService {
 }
 
 // シングルトンインスタンスをエクスポート
-export const serviceLogService = new ServiceLogService(apiClient);
+export const serviceLogService = new ServiceLogService(apiClientInstance);

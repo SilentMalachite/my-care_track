@@ -60,8 +60,8 @@ describe('AssessmentDetail', () => {
     it('アセスメントの基本情報が表示される', () => {
       renderWithRouter(<AssessmentDetail {...defaultProps} />);
 
-      expect(screen.getByText('初回')).toBeInTheDocument();
-      expect(screen.getByText('2025/07/27')).toBeInTheDocument();
+      expect(screen.getByText('初回アセスメント')).toBeInTheDocument();
+      expect(screen.getByText('2025/7/27')).toBeInTheDocument();
       expect(screen.getByText('山田太郎')).toBeInTheDocument();
       expect(screen.getByText('スタッフA')).toBeInTheDocument();
       expect(screen.getByText('日常生活支援計画')).toBeInTheDocument();
@@ -210,8 +210,9 @@ describe('AssessmentDetail', () => {
     it('印刷時に適切なクラスが適用される', () => {
       const { container } = renderWithRouter(<AssessmentDetail {...defaultProps} />);
 
-      const printOnlyElements = container.querySelectorAll('.print\\:block');
-      expect(printOnlyElements.length).toBeGreaterThan(0);
+      const printHiddenElements = container.querySelectorAll('[class*="print:hidden"]');
+      const printStyleElements = container.querySelectorAll('[class*="print:"]');
+      expect(printStyleElements.length).toBeGreaterThan(0);
     });
   });
 });

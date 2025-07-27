@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { AssessmentList as AssessmentListComponent } from '../../components/assessments/AssessmentList';
 import { assessmentService } from '../../services/assessmentService';
 import { clientService } from '../../services/clientService';
+import { staffService } from '../../services/staffService';
 import type { Assessment } from '../../types/assessment';
 import type { Client } from '../../types/client';
+import type { Staff } from '../../types/staff';
 
 export function AssessmentList() {
   const navigate = useNavigate();
@@ -21,9 +23,10 @@ export function AssessmentList() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [assessmentsData, clientsData] = await Promise.all([
+      const [assessmentsData, clientsData, staffData] = await Promise.all([
         assessmentService.getAssessments(),
         clientService.getClients(),
+        staffService.getStaff(),
       ]);
 
       setAssessments(assessmentsData);
@@ -35,11 +38,12 @@ export function AssessmentList() {
       });
       setClients(clientsMap);
 
-      // TODO: スタッフ情報も同様に取得
-      setStaff({
-        1: { name: 'スタッフA' },
-        2: { name: 'スタッフB' },
+      // スタッフ情報をマップに変換
+      const staffMap: Record<number, { name: string }> = {};
+      staffData.forEach((staff: Staff) => {
+        staffMap[staff.id] = { name: staff.name };
       });
+      setStaff(staffMap);
     } catch (err) {
       setError('データの読み込みに失敗しました');
       console.error(err);

@@ -24,7 +24,7 @@ export function AssessmentForm({
     clientId: assessment?.clientId || 0,
     staffId: assessment?.staffId || 0,
     supportPlanId: assessment?.supportPlanId,
-    assessmentType: assessment?.assessmentType || 'initial',
+    assessmentType: assessment?.assessmentType || '',
     assessmentDate: assessment?.assessmentDate || '',
     summary: assessment?.summary || '',
     overallScore: assessment?.overallScore,
@@ -110,6 +110,7 @@ export function AssessmentForm({
         onSubmit={handleSubmit}
         className="space-y-6"
         aria-label="評価・アセスメント登録フォーム"
+        noValidate
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* クライアント */}
@@ -200,6 +201,7 @@ export function AssessmentForm({
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               aria-required="true"
             >
+              <option value="">選択してください</option>
               <option value="initial">初回</option>
               <option value="periodic">定期</option>
               <option value="annual">年次</option>

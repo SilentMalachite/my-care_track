@@ -65,7 +65,7 @@ describe('Navigation', () => {
       expect(navList).toBeInTheDocument();
 
       const navItems = screen.getAllByRole('listitem');
-      expect(navItems).toHaveLength(5);
+      expect(navItems).toHaveLength(6);
     });
   });
 
@@ -265,7 +265,7 @@ describe('Navigation', () => {
 
       // リスト構造
       expect(screen.getByRole('list')).toBeInTheDocument();
-      expect(screen.getAllByRole('listitem')).toHaveLength(5);
+      expect(screen.getAllByRole('listitem')).toHaveLength(6);
 
       // リンクの説明
       const links = screen.getAllByRole('link');

@@ -4,9 +4,11 @@ import { AssessmentDetail as AssessmentDetailComponent } from '../../components/
 import { assessmentService } from '../../services/assessmentService';
 import { clientService } from '../../services/clientService';
 import { supportPlanService } from '../../services/supportPlanService';
+import { staffService } from '../../services/staffService';
 import type { Assessment } from '../../types/assessment';
 import type { Client } from '../../types/client';
 import type { SupportPlan } from '../../types/supportPlan';
+import type { Staff } from '../../types/staff';
 
 export function AssessmentDetail() {
   const { id } = useParams<{ id: string }>();
@@ -31,20 +33,19 @@ export function AssessmentDetail() {
       setAssessment(assessmentData);
 
       // 関連データを取得
-      const [clientData, planData] = await Promise.all([
+      const [clientData, planData, staffData] = await Promise.all([
         clientService.getClientById(assessmentData.clientId),
         assessmentData.supportPlanId
           ? supportPlanService.getSupportPlanById(assessmentData.supportPlanId)
           : Promise.resolve(null),
+        staffService.getStaffById(assessmentData.staffId),
       ]);
 
       setClient({ id: clientData.id, name: clientData.name });
       if (planData) {
         setSupportPlan({ id: planData.id, planName: planData.planName });
       }
-
-      // TODO: スタッフ情報も同様に取得
-      setStaff({ id: assessmentData.staffId, name: 'スタッフA' });
+      setStaff({ id: staffData.id, name: staffData.name });
     } catch (err) {
       setError('データの読み込みに失敗しました');
       console.error(err);

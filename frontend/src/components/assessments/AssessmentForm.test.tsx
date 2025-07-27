@@ -77,7 +77,7 @@ describe('AssessmentForm', () => {
 
       expect(screen.getByText('評価・アセスメント編集')).toBeInTheDocument();
       expect(screen.getByDisplayValue('初回アセスメントを実施しました。')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('75')).toBeInTheDocument();
+      expect(screen.getByLabelText('総合評価スコア')).toHaveValue(75);
     });
   });
 
@@ -102,7 +102,7 @@ describe('AssessmentForm', () => {
 
       // スコア入力
       await user.type(screen.getByLabelText('総合評価スコア'), '80');
-      expect(screen.getByLabelText('総合評価スコア')).toHaveValue('80');
+      expect(screen.getByLabelText('総合評価スコア')).toHaveValue(80);
     });
 
     it('カテゴリスコアを入力できる', async () => {
@@ -113,7 +113,7 @@ describe('AssessmentForm', () => {
       for (const category of categoryScores) {
         const input = screen.getByLabelText(category);
         await user.type(input, '75');
-        expect(input).toHaveValue('75');
+        expect(input).toHaveValue(75);
       }
     });
   });
@@ -138,6 +138,13 @@ describe('AssessmentForm', () => {
       const user = userEvent.setup();
       render(<AssessmentForm {...defaultProps} />);
 
+      // 必須フィールドを入力
+      await user.selectOptions(screen.getByLabelText('クライアント *'), '1');
+      await user.selectOptions(screen.getByLabelText('担当スタッフ *'), '1');
+      await user.selectOptions(screen.getByLabelText('アセスメント種別 *'), 'initial');
+      await user.type(screen.getByLabelText('評価日 *'), '2025-07-27');
+
+      // 範囲外のスコアを入力
       const scoreInput = screen.getByLabelText('総合評価スコア');
       await user.type(scoreInput, '150');
 
@@ -147,6 +154,9 @@ describe('AssessmentForm', () => {
       await waitFor(() => {
         expect(screen.getByText('スコアは1から100の間で入力してください')).toBeInTheDocument();
       });
+
+      // onSubmitが呼ばれていないことを確認
+      expect(mockOnSubmit).not.toHaveBeenCalled();
     });
   });
 
@@ -174,7 +184,8 @@ describe('AssessmentForm', () => {
             assessmentDate: '2025-07-27',
             summary: '新規アセスメント',
             overallScore: 80,
-          })
+          }),
+          undefined
         );
       });
     });

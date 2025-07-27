@@ -248,7 +248,7 @@ describe('AppRoutes', () => {
     });
 
     it('routeConfigの数が正しい', () => {
-      expect(routeConfig).toHaveLength(13);
+      expect(routeConfig).toHaveLength(17);
     });
   });
 });

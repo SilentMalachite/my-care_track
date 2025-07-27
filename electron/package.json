@@ -6,15 +6,12 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "vitest"
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
-    "electron": "^latest",
-    "sqlite3": "^latest"
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
-    "@types/node": "^latest",
-    "typescript": "^latest",
-    "vitest": "^latest"
   }
 }

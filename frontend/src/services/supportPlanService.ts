@@ -1,5 +1,4 @@
-import apiClient, { ApiClient } from './api';
-import { API_ENDPOINTS } from './api';
+import { apiClientInstance, ApiClient, API_ENDPOINTS } from './api';
 import {
   SupportPlan,
   CreateSupportPlanRequest,
@@ -177,4 +176,4 @@ class SupportPlanService {
 }
 
 // シングルトンインスタンスをエクスポート
-export const supportPlanService = new SupportPlanService(apiClient);
+export const supportPlanService = new SupportPlanService(apiClientInstance);

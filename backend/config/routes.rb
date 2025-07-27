@@ -47,6 +47,15 @@ Rails.application.routes.draw do
           post :finalize
         end
       end
+
+      resources :staff do
+        collection do
+          get :active
+        end
+        member do
+          patch :deactivate
+        end
+      end
     end
   end
 end

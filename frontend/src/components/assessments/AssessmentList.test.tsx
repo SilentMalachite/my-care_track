@@ -176,14 +176,14 @@ describe('AssessmentList', () => {
     it('詳細リンクが正しく設定されている', () => {
       renderWithRouter(<AssessmentList {...defaultProps} />);
 
-      const detailLink = screen.getByRole('link', { name: /初回アセスメント/ });
+      const detailLink = screen.getByRole('link', { name: '山田太郎' });
       expect(detailLink).toHaveAttribute('href', '/assessments/1');
     });
 
     it('編集リンクが正しく設定されている', () => {
       renderWithRouter(<AssessmentList {...defaultProps} />);
 
-      const editLinks = screen.getAllByText('編集');
+      const editLinks = screen.getAllByRole('link', { name: '編集' });
       expect(editLinks[0]).toHaveAttribute('href', '/assessments/1/edit');
     });
 
@@ -248,7 +248,8 @@ describe('AssessmentList', () => {
       renderWithRouter(<AssessmentList {...defaultProps} />);
 
       const items = screen.getAllByRole('listitem');
-      expect(items[0]).toHaveAttribute('aria-label', expect.stringContaining('山田太郎'));
+      // items[0]はヘッダー行なので、items[1]から確認
+      expect(items[1]).toHaveAttribute('aria-label', expect.stringContaining('山田太郎'));
     });
   });
 });
