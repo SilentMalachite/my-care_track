@@ -243,19 +243,10 @@ bundle outdated
 
 ## 📞 連絡先
 
-### セキュリティチーム
-- **Email**: security@yourcompany.com
-- **緊急連絡**: +81-XX-XXXX-XXXX
-- **対応時間**: 平日 9:00-18:00 JST
-
 ### 開発チーム
-- **Email**: dev@yourcompany.com
 - **GitHub**: @SilentMalachite/my-care_track
 
----
 
-**最終更新**: 2025-01-27  
-**次回見直し予定**: 2025-04-27
 
 ---
 
