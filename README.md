@@ -6,7 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue.svg)](https://www.typescriptlang.org/)
 [![Test Status](https://img.shields.io/badge/Tests-168%20passed-green.svg)](./backend/spec)
 
-オフライン対応のデスクトップアプリケーションで、障害者福祉サービスのクライアント管理を行います。
+オフライン対応のデスクトップアプリケーションで、障害者福祉サービスのクライアント管理を行います。ベータ版です。
 
 ## 🎯 プロジェクト概要
 
