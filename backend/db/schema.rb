@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_27_085457) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_30_154602) do
   create_table "assessments", force: :cascade do |t|
     t.integer "client_id", null: false
     t.integer "staff_id", null: false
@@ -128,6 +128,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_27_085457) do
     t.integer "failed_login_attempts", default: 0, null: false
     t.datetime "locked_at"
     t.datetime "password_changed_at"
+    t.string "department"
+    t.date "hire_date"
     t.index ["email"], name: "index_staffs_on_email", unique: true
     t.index ["staff_number"], name: "index_staffs_on_staff_number", unique: true
     t.index ["status"], name: "index_staffs_on_status"

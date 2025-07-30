@@ -371,7 +371,7 @@ DEPENDENCIES
   brakeman
   debug
   factory_bot_rails (~> 6.5)
-  jwt (~> 2.9)
+  jwt (~> 2.10)
   kamal
   kaminari (~> 1.2)
   puma (>= 5.0)

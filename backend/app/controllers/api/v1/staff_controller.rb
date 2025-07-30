@@ -1,5 +1,5 @@
 class Api::V1::StaffController < ApplicationController
-  before_action :authenticate_user!
+  # authenticate_request is called in ApplicationController
   before_action :set_staff, only: [:show, :update, :destroy]
 
   # GET /api/v1/staff

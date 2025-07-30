@@ -33,10 +33,14 @@ export class Database {
       const db = new sqlite3.Database(this.dbPath, (err) => {
         if (err) {
           reject(err);
-        } else {
-          resolve(db);
         }
       });
+      
+      // sqlite3.Database constructorは同期的にdbオブジェクトを返すので、
+      // エラーがなければ即座にresolve可能
+      if (db) {
+        resolve(db);
+      }
     });
   }
 

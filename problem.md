@@ -1,20 +1,46 @@
-# Project Issues
+# プロジェクトの問題点
 
-This document outlines potential issues identified in the project structure.
+## 1. 技術スタックの複雑性
 
-## 1. Project Structure Complexity
+- **内容:** このプロジェクトはElectron、React (Vite)、Ruby on Railsという3つの主要な技術で構成されています。それぞれの技術スタックが独立しているため、学習コストや開発・保守のオーバーヘッドが大きくなる可能性があります。
+- **リスク:**
+    - フロントエンド、バックエンド、デスクトップアプリケーション間の連携（API通信、データ同期など）が複雑になり、問題が発生しやすくなります。
+    - 開発者全員がすべての技術スタックに精通することが難しく、属人化が進む可能性があります。
 
-*   **Redundant Frontend Directories**: There are two `frontend` directories, one at the root and another inside `backend/`. This is confusing and makes it unclear which one is in use.
-*   **Technology Sprawl**: The project combines Electron, Ruby on Rails, and React in a single repository. The relationship and orchestration between these parts are not immediately clear from the file structure alone.
+## 2. モノレポ管理の課題
 
-## 2. Dependency Management Duplication
+- **内容:** フロントエンド、バックエンド、Electronのコードが単一のリポジトリで管理されています。
+- **リスク:**
+    - `package.json`が複数存在し、依存関係の管理が煩雑になる可能性があります。バージョン競合などが発生しやすくなります。
+    - 各コンポーネントのビルド、テスト、デプロイのプロセスが密結合になりやすく、一部の変更が他の部分に意図しない影響を与える可能性があります。
+    - CI/CDのパイプラインが複雑化し、ビルド時間が長くなる傾向があります。
 
-*   **Multiple `package.json` Files**: `package.json` files exist in several locations (root, `backend/frontend/`, `electron/`, `frontend/`). This can lead to:
-    *   Inconsistent library versions.
-    *   Redundant installations of the same libraries.
-    *   Complicated and error-prone dependency updates.
+## 3. テストカバレッジの不足
 
-## 3. Complicated Build Process
+- **内容:** ファイル構造を見る限り、テストディレクトリ (`spec`, `tests`, `frontend/src/test`) は存在しますが、テストファイルが十分に整備されていない可能性があります。
+- **リスク:**
+    - 機能の品質を担保することが難しく、手動テストへの依存度が高まります。
+    - リファクタリングや機能追加時のデグレード（意図しない不具合の発生）に気づきにくくなります。
+    - 特に、コンポーネント間の連携を保証する結合テストやE2Eテストの不足が懸念されます。
 
-*   **Multiple Build Systems**: The backend, frontend, and desktop app each require their own build process. This likely complicates the end-to-end workflow for development and deployment.
-*   **High Onboarding Cost**: The complexity of the setup increases the learning curve for new developers joining the project.
+## 4. ビルドとデプロイの複雑性
+
+- **内容:** Vite、Electron Builder、Docker、Kamalなど、多岐にわたるツールが使用されており、ビルドとデプロイのプロセスが非常に複雑です。
+- **リスク:**
+    - 新しい開発者が環境構築やリリース作業を理解するのに時間がかかります。
+    - 設定ファイル（`vite.config.ts`, `electron-builder.json`, `Dockerfile`, `deploy.yml`など）が分散しており、全体像の把握や管理が困難です。
+    - プロセスが複雑なため、自動化されていてもエラー発生時のトラブルシューティングが難しくなります。
+
+## 5. ドキュメントの陳腐化の可能性
+
+- **内容:** `ARCHITECTURE.md`や`DEVELOPMENT.md`などのアーキテクチャや開発に関するドキュメントが存在します。
+- **リスク:**
+    - プロジェクトの進化（コードの変更や機能追加）にドキュメントが追従できず、情報が古くなっている可能性があります。
+    - 古いドキュメントは、新規参画者の誤解を招き、開発効率を低下させる原因となります。
+
+## 6. 依存関係の管理
+
+- **内容:** `backend/Gemfile`、`frontend/package.json`、`electron/package.json`で多数の外部ライブラリに依存しています。
+- **リスク:**
+    - ライブラリに古いバージョンが使われている場合、既知のセキュリティ脆弱性が含まれている可能性があります。
+    - 定期的な棚卸しと更新が行われていない場合、ライブラリの互換性の問題や、サポート終了によるリスクが発生します。

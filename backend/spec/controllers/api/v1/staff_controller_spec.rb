@@ -1,15 +1,17 @@
 require 'rails_helper'
 
-RSpec.describe StaffController, type: :controller do
-  let(:user) { create(:user) }
+RSpec.describe Api::V1::StaffController, type: :controller do
+  let(:user) { create(:staff) }
   let(:valid_attributes) {
     {
+      staff_number: 'S001',
       name: '山田太郎',
       email: 'yamada@example.com',
       phone: '090-1234-5678',
-      role: 'ケアマネージャー',
+      role: 'staff',
       department: '介護支援課',
-      hire_date: '2020-04-01'
+      hire_date: '2020-04-01',
+      password: 'Password123!'
     }
   }
 
@@ -17,23 +19,26 @@ RSpec.describe StaffController, type: :controller do
     { name: nil }
   }
 
+  let(:token) { JWT.encode({ staff_id: user.id }, Rails.application.credentials.secret_key_base) }
+  
   before do
-    sign_in user
+    request.headers['Authorization'] = "Bearer #{token}"
   end
 
   describe "GET #index" do
     it "全てのスタッフを返す" do
       staff1 = Staff.create!(valid_attributes)
-      staff2 = Staff.create!(valid_attributes.merge(name: '佐藤花子', email: 'sato@example.com'))
+      staff2 = Staff.create!(valid_attributes.merge(staff_number: 'S002', name: '佐藤花子', email: 'sato@example.com'))
       get :index
       expect(response).to have_http_status(:success)
       json = JSON.parse(response.body)
-      expect(json.length).to eq(2)
+      # user (from let) + staff1 + staff2 = 3
+      expect(json.length).to eq(3)
     end
 
     it "検索パラメータでフィルタリングできる" do
       staff1 = Staff.create!(valid_attributes)
-      staff2 = Staff.create!(valid_attributes.merge(name: '佐藤花子', email: 'sato@example.com'))
+      staff2 = Staff.create!(valid_attributes.merge(staff_number: 'S002', name: '佐藤花子', email: 'sato@example.com'))
       get :index, params: { search: '山田' }
       json = JSON.parse(response.body)
       expect(json.length).to eq(1)
@@ -42,7 +47,7 @@ RSpec.describe StaffController, type: :controller do
 
     it "部署でフィルタリングできる" do
       staff1 = Staff.create!(valid_attributes)
-      staff2 = Staff.create!(valid_attributes.merge(department: '訪問介護課', email: 'sato@example.com'))
+      staff2 = Staff.create!(valid_attributes.merge(staff_number: 'S002', department: '訪問介護課', email: 'sato@example.com'))
       get :index, params: { department: '介護支援課' }
       json = JSON.parse(response.body)
       expect(json.length).to eq(1)
@@ -51,11 +56,12 @@ RSpec.describe StaffController, type: :controller do
 
     it "アクティブステータスでフィルタリングできる" do
       staff1 = Staff.create!(valid_attributes)
-      staff2 = Staff.create!(valid_attributes.merge(is_active: false, email: 'sato@example.com'))
+      staff2 = Staff.create!(valid_attributes.merge(staff_number: 'S002', email: 'sato@example.com', status: 'inactive'))
       get :index, params: { is_active: true }
       json = JSON.parse(response.body)
-      expect(json.length).to eq(1)
-      expect(json[0]['is_active']).to be true
+      # userとstaff1のみがactive
+      expect(json.length).to eq(2)
+      expect(json.all? { |s| s['isActive'] }).to be true
     end
   end
 
@@ -110,19 +116,19 @@ RSpec.describe StaffController, type: :controller do
     let(:staff) { Staff.create!(valid_attributes) }
 
     context "有効なパラメータの場合" do
-      let(:new_attributes) { { role: 'シニアケアマネージャー' } }
+      let(:new_attributes) { { role: 'admin' } }
 
       it "スタッフを更新する" do
         patch :update, params: { id: staff.id, staff: new_attributes }
         staff.reload
-        expect(staff.role).to eq('シニアケアマネージャー')
+        expect(staff.role).to eq('admin')
       end
 
       it "更新されたスタッフを返す" do
         patch :update, params: { id: staff.id, staff: new_attributes }
         expect(response).to have_http_status(:ok)
         json = JSON.parse(response.body)
-        expect(json['role']).to eq('シニアケアマネージャー')
+        expect(json['role']).to eq('admin')
       end
     end
 
@@ -146,7 +152,7 @@ RSpec.describe StaffController, type: :controller do
 
   describe "認証" do
     context "ログインしていない場合" do
-      before { sign_out user }
+      before { request.headers['Authorization'] = nil }
 
       it "401を返す" do
         get :index

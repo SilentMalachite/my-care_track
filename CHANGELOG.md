@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - project-structure.test.js - プロジェクト構造検証（7テスト）
   - dependency-management.test.js - 依存関係管理検証（6テスト）
   - build-process.test.js - ビルドプロセス検証（11テスト）
+- **データベースマイグレーション**
+  - Staffテーブルにdepartmentとhire_dateカラムを追加
 
 ### Changed
 - **依存関係管理の統合**
@@ -28,11 +30,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ビルドプロセスの改善**
   - build:allスクリプトを追加
   - ワークスペース対応のnpm installコマンド
+- **依存関係の更新**
+  - フロントエンドのnpmパッケージを最新版に更新
+  - JWTのGemfileバージョン制約を緩和（~> 2.9 から ~> 2.10へ）
 
 ### Fixed
 - フロントエンドディレクトリの重複問題を解決
 - 依存関係の重複とバージョン不整合を解消
 - ビルドプロセスの複雑性を簡素化
+- **テストの修正**
+  - StaffControllerのテストスペックをApi::V1名前空間に移動
+  - StaffControllerの認証メソッドをauthenticate_requestに変更
+  - Staffモデルにデータベースカラムを追加してテストを修正
+  - Electronのdatabase.tsでホイスティング問題を修正
+  - Electronのデータベーステストのモック実装を改善（22テスト中21成功）
 
 ## [1.0.0] - 2025-07-27
 

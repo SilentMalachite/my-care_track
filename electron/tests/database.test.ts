@@ -4,50 +4,53 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 // モジュールのモック
-vi.mock('sqlite3', () => ({
-  default: {
-    Database: vi.fn().mockImplementation((path: string, callback: any) => {
-      const db = {
-        run: vi.fn((sql: string, params: any, callback: any) => {
-          if (typeof params === 'function') {
-            callback = params;
-            params = [];
-          }
-          callback?.call({ lastID: 1, changes: 1 }, null);
-          return db;
-        }),
-        get: vi.fn((sql: string, params: any, callback: any) => {
-          if (typeof params === 'function') {
-            callback = params;
-            params = [];
-          }
-          callback?.(null, { id: 1, name: 'Test' });
-          return db;
-        }),
-        all: vi.fn((sql: string, params: any, callback: any) => {
-          if (typeof params === 'function') {
-            callback = params;
-            params = [];
-          }
-          callback?.(null, [{ id: 1, name: 'Test' }]);
-          return db;
-        }),
-        close: vi.fn((callback: any) => {
-          callback?.(null);
-          return db;
-        }),
-        serialize: vi.fn((callback: any) => {
-          callback?.();
-          return db;
-        }),
-      };
-      callback?.(null);
-      return db;
-    }),
-    OPEN_READWRITE: 2,
-    OPEN_CREATE: 4,
-  },
-}));
+const mockDatabase = {
+  run: vi.fn((sql: string, params: any, callback: any) => {
+    if (typeof params === 'function') {
+      callback = params;
+      params = [];
+    }
+    callback?.call({ lastID: 1, changes: 1 }, null);
+    return mockDatabase;
+  }),
+  get: vi.fn((sql: string, params: any, callback: any) => {
+    if (typeof params === 'function') {
+      callback = params;
+      params = [];
+    }
+    callback?.(null, { id: 1, name: 'Test' });
+    return mockDatabase;
+  }),
+  all: vi.fn((sql: string, params: any, callback: any) => {
+    if (typeof params === 'function') {
+      callback = params;
+      params = [];
+    }
+    callback?.(null, [{ id: 1, name: 'Test' }]);
+    return mockDatabase;
+  }),
+  close: vi.fn((callback: any) => {
+    callback?.(null);
+    return mockDatabase;
+  }),
+  serialize: vi.fn((callback: any) => {
+    callback?.();
+    return mockDatabase;
+  }),
+};
+
+vi.mock('sqlite3', () => {
+  return {
+    default: {
+      Database: vi.fn().mockImplementation((path: string, callback: any) => {
+        callback?.(null);
+        return mockDatabase;
+      }),
+      OPEN_READWRITE: 2,
+      OPEN_CREATE: 4,
+    },
+  };
+});
 
 vi.mock('fs/promises', () => ({
   mkdir: vi.fn().mockResolvedValue(undefined),
@@ -66,6 +69,31 @@ describe('Database Module', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // モックのデフォルト実装を復元
+    mockDatabase.run.mockImplementation((sql: string, params: any, callback: any) => {
+      if (typeof params === 'function') {
+        callback = params;
+        params = [];
+      }
+      callback?.call({ lastID: 1, changes: 1 }, null);
+      return mockDatabase;
+    });
+    mockDatabase.get.mockImplementation((sql: string, params: any, callback: any) => {
+      if (typeof params === 'function') {
+        callback = params;
+        params = [];
+      }
+      callback?.(null, { id: 1, name: 'Test' });
+      return mockDatabase;
+    });
+    mockDatabase.all.mockImplementation((sql: string, params: any, callback: any) => {
+      if (typeof params === 'function') {
+        callback = params;
+        params = [];
+      }
+      callback?.(null, [{ id: 1, name: 'Test' }]);
+      return mockDatabase;
+    });
   });
 
   afterEach(async () => {
@@ -97,38 +125,32 @@ describe('Database Module', () => {
 
       await database.initialize();
 
-      const mockDb = (sqlite3.default.Database as any).mock.results[0].value;
-      const runCalls = mockDb.run.mock.calls;
+      const runCalls = mockDatabase.run.mock.calls;
 
       // clientsテーブルの作成を確認
-      expect(runCalls).toContainEqual([
-        expect.stringContaining('CREATE TABLE IF NOT EXISTS clients'),
-        expect.any(Function),
-      ]);
+      expect(runCalls.some(call => 
+        call[0].includes('CREATE TABLE IF NOT EXISTS clients')
+      )).toBe(true);
 
       // support_plansテーブルの作成を確認
-      expect(runCalls).toContainEqual([
-        expect.stringContaining('CREATE TABLE IF NOT EXISTS support_plans'),
-        expect.any(Function),
-      ]);
+      expect(runCalls.some(call => 
+        call[0].includes('CREATE TABLE IF NOT EXISTS support_plans')
+      )).toBe(true);
 
       // service_logsテーブルの作成を確認
-      expect(runCalls).toContainEqual([
-        expect.stringContaining('CREATE TABLE IF NOT EXISTS service_logs'),
-        expect.any(Function),
-      ]);
+      expect(runCalls.some(call => 
+        call[0].includes('CREATE TABLE IF NOT EXISTS service_logs')
+      )).toBe(true);
 
       // staffテーブルの作成を確認
-      expect(runCalls).toContainEqual([
-        expect.stringContaining('CREATE TABLE IF NOT EXISTS staff'),
-        expect.any(Function),
-      ]);
+      expect(runCalls.some(call => 
+        call[0].includes('CREATE TABLE IF NOT EXISTS staff')
+      )).toBe(true);
 
       // emergency_contactsテーブルの作成を確認
-      expect(runCalls).toContainEqual([
-        expect.stringContaining('CREATE TABLE IF NOT EXISTS emergency_contacts'),
-        expect.any(Function),
-      ]);
+      expect(runCalls.some(call => 
+        call[0].includes('CREATE TABLE IF NOT EXISTS emergency_contacts')
+      )).toBe(true);
     });
 
     it('既存のデータベースがある場合は再利用される', async () => {
@@ -177,8 +199,7 @@ describe('Database Module', () => {
     });
 
     it('空の結果が正しく返される', async () => {
-      const mockDb = (sqlite3.default.Database as any).mock.results[0].value;
-      mockDb.all.mockImplementationOnce((sql: string, params: any, callback: any) => {
+      mockDatabase.all.mockImplementationOnce((sql: string, params: any, callback: any) => {
         if (typeof params === 'function') {
           callback = params;
           params = [];
@@ -196,8 +217,7 @@ describe('Database Module', () => {
     });
 
     it('クエリエラーが適切に処理される', async () => {
-      const mockDb = (sqlite3.default.Database as any).mock.results[0].value;
-      mockDb.all.mockImplementationOnce((sql: string, params: any, callback: any) => {
+      mockDatabase.all.mockImplementationOnce((sql: string, params: any, callback: any) => {
         if (typeof params === 'function') {
           callback = params;
           params = [];
@@ -251,18 +271,20 @@ describe('Database Module', () => {
     });
 
     it('変更がない場合は changes が 0 になる', async () => {
-      const mockDb = (sqlite3.default.Database as any).mock.results[0].value;
-      mockDb.run.mockImplementationOnce((sql: string, params: any, callback: any) => {
+      const { Database } = await import('../db/database');
+      database = new Database();
+      await database.initialize();
+
+      // changes を 0 に設定するために、一度モックをクリアして新しい実装を設定
+      mockDatabase.run.mockClear();
+      mockDatabase.run.mockImplementation((sql: string, params: any, callback: any) => {
         if (typeof params === 'function') {
           callback = params;
           params = [];
         }
         callback.call({ lastID: 0, changes: 0 }, null);
+        return mockDatabase;
       });
-
-      const { Database } = await import('../db/database');
-      database = new Database();
-      await database.initialize();
 
       const result = await database.run('UPDATE clients SET name = ? WHERE id = ?', ['test', 999]);
 
@@ -281,11 +303,10 @@ describe('Database Module', () => {
         await db.run('INSERT INTO clients (name) VALUES (?)', ['Client 2']);
       });
 
-      const mockDb = (sqlite3.default.Database as any).mock.results[0].value;
-      const runCalls = mockDb.run.mock.calls;
+      const runCalls = mockDatabase.run.mock.calls;
 
-      expect(runCalls).toContainEqual(['BEGIN TRANSACTION', expect.any(Function)]);
-      expect(runCalls).toContainEqual(['COMMIT', expect.any(Function)]);
+      expect(runCalls.some(call => call[0] === 'BEGIN TRANSACTION')).toBe(true);
+      expect(runCalls.some(call => call[0] === 'COMMIT')).toBe(true);
     });
 
     it('エラー時にロールバックされる', async () => {
@@ -300,11 +321,10 @@ describe('Database Module', () => {
         })
       ).rejects.toThrow('Transaction error');
 
-      const mockDb = (sqlite3.default.Database as any).mock.results[0].value;
-      const runCalls = mockDb.run.mock.calls;
+      const runCalls = mockDatabase.run.mock.calls;
 
-      expect(runCalls).toContainEqual(['BEGIN TRANSACTION', expect.any(Function)]);
-      expect(runCalls).toContainEqual(['ROLLBACK', expect.any(Function)]);
+      expect(runCalls.some(call => call[0] === 'BEGIN TRANSACTION')).toBe(true);
+      expect(runCalls.some(call => call[0] === 'ROLLBACK')).toBe(true);
     });
   });
 
@@ -369,19 +389,24 @@ describe('Database Module', () => {
 
   describe('ヘルパーメソッド', () => {
     it('getClientByIdが正しく動作する', async () => {
+      // 先にモックを設定
+      mockDatabase.get.mockImplementationOnce((sql: string, params: any, callback: any) => {
+        if (typeof params === 'function') {
+          callback = params;
+          params = [];
+        }
+        callback(null, { id: 1, name: 'テストクライアント', status: 'active' });
+        return mockDatabase;
+      });
+
       const { Database } = await import('../db/database');
       database = new Database();
       await database.initialize();
 
-      const mockDb = (sqlite3.default.Database as any).mock.results[0].value;
-      mockDb.get.mockImplementationOnce((sql: string, params: any, callback: any) => {
-        callback(null, { id: 1, name: 'テストクライアント', status: 'active' });
-      });
-
       const client = await database.getClientById(1);
 
       expect(client).toEqual({ id: 1, name: 'テストクライアント', status: 'active' });
-      expect(mockDb.get).toHaveBeenCalledWith(
+      expect(mockDatabase.get).toHaveBeenCalledWith(
         expect.stringContaining('SELECT * FROM clients WHERE id = ?'),
         [1],
         expect.any(Function)
